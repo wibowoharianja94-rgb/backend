@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const todoController = require("../controllers/todo");
+const {
+  getCatalogs,
+  addCatalog,
+  editCatalog,
+  deleteCatalog,
+} = require("../controllers/catalogController");
 
-router.post("/get", todoController.getTodos);
-router.post("/add", todoController.addTodo);
-router.post("/edit", todoController.updateTodo);
-router.post("/delete", todoController.deleteTodo);
+router.post("/get", getCatalogs);
+router.post("/add", addCatalog);
+router.post("/edit", editCatalog);
+router.post("/delete", deleteCatalog);
 
 module.exports = router;

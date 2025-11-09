@@ -1,7 +1,8 @@
 const db = require("../config/mysql");
 
-const getTodos = (req, res) => {
-  const sql = "SELECT * FROM todos ORDER BY id DESC";
+// 🔹 Ambil semua data katalog
+const getCatalogs = (req, res) => {
+  const sql = "SELECT * FROM cataloglist ORDER BY id DESC";
   db.query(sql, (err, result) => {
     if (err) return res.status(500).json({ message: "Error", error: err });
     if (result.length > 0)
@@ -10,43 +11,52 @@ const getTodos = (req, res) => {
   });
 };
 
-const addTodo = (req, res) => {
-  const { task } = req.body;
-  if (!task) return res.status(400).json({ message: "Task is required" });
+// 🔹 Tambah catatan baru
+const addCatalog = (req, res) => {
+  const { title, catatan, tanggal } = req.body;
+  if (!title || !catatan || !tanggal)
+    return res.status(400).json({ message: "All fields are required" });
 
-  db.query("INSERT INTO todos (task) VALUES (?)", [task], (err, result) => {
+  const sql =
+    "INSERT INTO cataloglist (title, catatan, tanggal) VALUES (?, ?, ?)";
+  db.query(sql, [title, catatan, tanggal], (err, result) => {
     if (err) return res.status(500).json({ message: "Error", error: err });
     res.status(200).json({
       message: "Success",
-      val: { id: result.insertId, task, status: 0 },
+      val: { id: result.insertId, title, catatan, tanggal },
     });
   });
 };
 
-const updateTodo = (req, res) => {
-  const { id, task, status } = req.body;
+// 🔹 Edit catatan
+const editCatalog = (req, res) => {
+  const { id, title, catatan, tanggal } = req.body;
+  if (!id)
+    return res.status(400).json({ message: "ID is required for editing" });
 
-  if (task !== undefined) {
-    db.query("UPDATE todos SET task = ? WHERE id = ?", [task, id], (err, result) => {
-      if (err) return res.status(500).json({ message: "Error", error: err });
-      res.status(200).json({ message: "Success", val: result });
-    });
-  } else if (status !== undefined) {
-    db.query("UPDATE todos SET status = ? WHERE id = ?", [status, id], (err, result) => {
-      if (err) return res.status(500).json({ message: "Error", error: err });
-      res.status(200).json({ message: "Status updated", val: result });
-    });
-  } else {
-    res.status(400).json({ message: "No valid data provided" });
-  }
-};
-
-const deleteTodo = (req, res) => {
-  const { id } = req.body;
-  db.query("DELETE FROM todos WHERE id = ?", [id], (err, result) => {
+  const sql =
+    "UPDATE cataloglist SET title = ?, catatan = ?, tanggal = ? WHERE id = ?";
+  db.query(sql, [title, catatan, tanggal, id], (err, result) => {
     if (err) return res.status(500).json({ message: "Error", error: err });
-    res.status(200).json({ message: "Todo deleted", val: result });
+    res.status(200).json({ message: "Success", val: result });
   });
 };
 
-module.exports = { getTodos, addTodo, updateTodo, deleteTodo };
+// 🔹 Hapus catatan
+const deleteCatalog = (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ message: "ID is required" });
+
+  const sql = "DELETE FROM cataloglist WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error", error: err });
+    res.status(200).json({ message: "Success", val: result });
+  });
+};
+
+module.exports = {
+  getCatalogs,
+  addCatalog,
+  editCatalog,
+  deleteCatalog,
+};
